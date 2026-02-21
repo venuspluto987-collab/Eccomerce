@@ -1,48 +1,53 @@
 import streamlit as st
 import pandas as pd
-import matplotlib.pyplot as plt
 
-# PAGE SETTINGS
-st.set_page_config(layout="wide", page_title="E-Commerce AI Dashboard")
+# FULL SCREEN WIDE MODE
+st.set_page_config(layout="wide", page_title="E-Commerce Dashboard")
 
-# LOAD CSS
-with open("style.css") as f:
-    st.markdown(f"<style>{f.read()}</style>", unsafe_allow_html=True)
+# REMOVE STREAMLIT SCROLL & PADDING
+st.markdown("""
+<style>
+.main {
+    padding: 0px !important;
+}
+.block-container {
+    padding-top: 10px !important;
+    padding-bottom: 0px !important;
+}
+footer {visibility: hidden;}
+header {visibility: hidden;}
+</style>
+""", unsafe_allow_html=True)
 
-# LOAD DATA
+# Load Data
 products = pd.read_csv("products.csv")
 orders = pd.read_csv("orders.csv")
 
 # TITLE
-st.markdown("<h1>🛒 E-Commerce AI Chatbot Dashboard</h1>", unsafe_allow_html=True)
+st.markdown("<h2 style='text-align:center;'>🛒 E-Commerce AI Chatbot Dashboard</h2>", unsafe_allow_html=True)
 
-# ---------------- TOP ROW ----------------
+# -------- TOP ROW --------
 col1, col2 = st.columns(2)
 
-# TABLE LEFT
+# TABLE
 with col1:
     st.subheader("📦 Products Table")
-    st.table(products)   # NO SCROLL TABLE
+    st.dataframe(products, use_container_width=True, height=250)
 
-# CHART RIGHT
+# CHART
 with col2:
     st.subheader("📊 Stock Chart")
+    st.bar_chart(products.set_index("product")["stock"], height=250, use_container_width=True)
 
-    fig, ax = plt.subplots(figsize=(6,3))
-    ax.bar(products["product"], products["stock"])
-    ax.set_ylabel("Stock")
-    ax.set_title("Product Stock Levels")
-    st.pyplot(fig)
-
-# ---------------- BOTTOM ROW ----------------
+# -------- BOTTOM ROW --------
 col3, col4 = st.columns(2)
 
-# CHATBOT LEFT
+# CHATBOT
 with col3:
     st.subheader("🤖 Chatbot")
-    user_input = st.text_input("Ask product price or track order")
+    user_input = st.text_input("Ask product price or order tracking")
 
-    reply = ""
+    reply = "Ask me product price or order tracking 😊"
 
     if user_input:
         user_input = user_input.lower()
@@ -50,24 +55,21 @@ with col3:
         # Price Query
         for p in products["product"]:
             if p.lower() in user_input and "price" in user_input:
-                price = products[products["product"] == p]["price"].values[0]
+                price = products.loc[products["product"] == p, "price"].values[0]
                 reply = f"{p} price is ₹{price}"
 
         # Order Tracking
         if "track" in user_input or "order" in user_input:
-            for order_id in orders["order_id"].astype(str):
-                if order_id in user_input:
-                    status = orders[orders["order_id"] == int(order_id)]["status"].values[0]
-                    reply = f"Order {order_id} status: {status}"
+            for oid in orders["order_id"].astype(str):
+                if oid in user_input:
+                    status = orders.loc[orders["order_id"] == int(oid), "status"].values[0]
+                    reply = f"Order {oid} status: {status}"
 
-        if reply == "":
-            reply = "I can show product prices and track orders 😊"
+    st.success(reply)
 
-        st.markdown(f"<div class='chatbox'>🤖 {reply}</div>", unsafe_allow_html=True)
-
-# SUMMARY RIGHT
+# BUSINESS SUMMARY
 with col4:
-    st.subheader("📈 Business Summary")
+    st.subheader("📈 Summary")
 
     m1, m2, m3 = st.columns(3)
     m1.metric("Products", len(products))
