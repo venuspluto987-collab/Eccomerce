@@ -121,3 +121,4 @@ with col4:
     m1.metric("Products", len(products))
     m2.metric("Orders", len(orders))
     m3.metric("Total Stock", products["stock"].sum())
+
