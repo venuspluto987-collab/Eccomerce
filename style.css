@@ -30,4 +30,8 @@ h2 {
 .bot {
     color: green;
     font-weight: bold;
+
+}
+.block-container {
+    padding-top: 60px !important;
 }
