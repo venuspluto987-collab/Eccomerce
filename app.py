@@ -1,92 +1,122 @@
 import streamlit as st
 import pandas as pd
 
-st.set_page_config(layout="wide", page_title="E-Commerce Dashboard")
+# Page Config
+st.set_page_config(
+    page_title="E-Commerce Dashboard",
+    layout="wide"
+)
 
-# 🌈 COLORFUL BACKGROUND
+# ---------- CSS ----------
 st.markdown("""
 <style>
+/* Background Gradient */
 .stApp {
     background: linear-gradient(135deg, #ff4b5c, #ff758c, #5f2c82, #00c6ff);
     background-attachment: fixed;
 }
 
+/* Fix Heading Cut Issue */
+.block-container {
+    padding-top: 80px !important;
+}
+
+/* Title Style */
+h1 {
+    color: white !important;
+    text-align: center;
+    font-size: 40px !important;
+    font-weight: bold;
+}
+
+/* Table Background */
+.stDataFrame {
+    background-color: rgba(255,255,255,0.25);
+    border-radius: 12px;
+}
+
+/* Chart Background */
+canvas {
+    background-color: white;
+    border-radius: 12px;
+}
+
+/* Metrics Cards */
 [data-testid="stMetric"] {
-    background-color: rgba(255,255,255,0.15);
+    background-color: rgba(255,255,255,0.25);
     padding: 15px;
     border-radius: 15px;
     color: white;
 }
 
-.stDataFrame {
-    background-color: rgba(255,255,255,0.15);
-    border-radius: 12px;
-}
-
-.stTextInput > div > div > input {
-    background-color: rgba(255,255,255,0.2);
-    color: white;
-}
-
-h1, h2, h3 {
-    color: white !important;
-}
-
-.block-container {
-    padding-top: 10px !important;
+/* Input Box */
+.stTextInput input {
+    background-color: rgba(255,255,255,0.25);
+    color: black;
+    border-radius: 10px;
 }
 </style>
 """, unsafe_allow_html=True)
 
-# Load Data
-products = pd.read_csv("products.csv")
-orders = pd.read_csv("orders.csv")
+# ---------- LOAD DATA ----------
+products = pd.DataFrame({
+    "product": ["Laptop", "Mobile", "Headphones", "Smart Watch", "Camera"],
+    "price": [55000, 15000, 2000, 3500, 45000],
+    "stock": [10, 25, 50, 30, 5]
+})
 
-# Title
-st.markdown("<h2 style='text-align:center;'>🛒 E-Commerce AI Chatbot Dashboard</h2>", unsafe_allow_html=True)
+orders = pd.DataFrame({
+    "order_id": [101, 102, 103, 104],
+    "status": ["Delivered", "Shipped", "Processing", "Cancelled"]
+})
 
-# Layout
-col1, col2 = st.columns(2)
+# ---------- TITLE ----------
+st.title("🛒 E-Commerce AI Chatbot Dashboard")
 
-# Products Table
+# ---------- TOP ROW ----------
+col1, col2 = st.columns([1,1])
+
+# TABLE
 with col1:
     st.subheader("📦 Products Table")
-    st.dataframe(products, use_container_width=True, height=250)
+    st.dataframe(products, height=300, use_container_width=True)
 
-# Stock Chart
+# CHART
 with col2:
     st.subheader("📊 Stock Chart")
-    st.bar_chart(products.set_index("product")["stock"], height=250)
+    st.bar_chart(products.set_index("product")["stock"], height=300)
 
-# Bottom Layout
-col3, col4 = st.columns(2)
+# ---------- BOTTOM ROW ----------
+col3, col4 = st.columns([1,1])
 
-# Chatbot
+# CHATBOT
 with col3:
     st.subheader("🤖 Chatbot")
-    user_input = st.text_input("Ask product price or order tracking")
+    user_input = st.text_input("Ask product price or track order")
 
-    reply = "Ask me product price or order tracking 😊"
+    reply = "I can show product prices and track orders 😊"
 
     if user_input:
-        user_input = user_input.lower()
+        text = user_input.lower()
 
+        # Price Query
         for p in products["product"]:
-            if p.lower() in user_input and "price" in user_input:
-                price = products.loc[products["product"] == p, "price"].values[0]
+            if p.lower() in text and "price" in text:
+                price = products[products["product"] == p]["price"].values[0]
                 reply = f"{p} price is ₹{price}"
 
-        if "track" in user_input or "order" in user_input:
+        # Order Tracking
+        if "order" in text or "track" in text:
             for oid in orders["order_id"].astype(str):
-                if oid in user_input:
-                    status = orders.loc[orders["order_id"] == int(oid), "status"].values[0]
+                if oid in text:
+                    status = orders[orders["order_id"] == int(oid)]["status"].values[0]
                     reply = f"Order {oid} status: {status}"
 
     st.success(reply)
 
-# Summary
+# SUMMARY
 with col4:
-    st.subheader("📈 Summary")
+    st.subheader("📈 Business Summary")
     m1, m2, m3 = st.columns(3)
     m1.metric("Products", len(products))
     m2.metric("Orders", len(orders))
