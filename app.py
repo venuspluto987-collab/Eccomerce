@@ -1,42 +1,64 @@
 import streamlit as st
 import pandas as pd
-from streamlit_option_menu import option_menu
 
-# Page config
-st.set_page_config(page_title="E-Commerce Dashboard", layout="wide")
+# Page Config
+st.set_page_config(
+    page_title="E-Commerce Dashboard",
+    layout="wide"
+)
 
 # ---------- CSS ----------
 st.markdown("""
 <style>
+/* Background Gradient */
 .stApp {
     background: linear-gradient(135deg, #ff4b5c, #ff758c, #5f2c82, #00c6ff);
     background-attachment: fixed;
 }
 
+/* Fix Heading Cut Issue */
 .block-container {
-    padding-top: 50px !important;
+    padding-top: 80px !important;
 }
 
-h1, h2, h3 {
+/* Title Style */
+h1 {
     color: white !important;
+    text-align: center;
+    font-size: 40px !important;
+    font-weight: bold;
 }
 
-/* Card Style */
-.card {
-    background: rgba(255,255,255,0.25);
-    padding: 20px;
+/* Table Background */
+.stDataFrame {
+    background-color: rgba(255,255,255,0.25);
+    border-radius: 12px;
+}
+
+/* Chart Background */
+canvas {
+    background-color: white;
+    border-radius: 12px;
+}
+
+/* Metrics Cards */
+[data-testid="stMetric"] {
+    background-color: rgba(255,255,255,0.25);
+    padding: 15px;
     border-radius: 15px;
+    color: white;
 }
 
-/* Input */
+/* Input Box */
 .stTextInput input {
-    background: white;
+    background-color: rgba(255,255,255,0.25);
+    color: black;
     border-radius: 10px;
 }
 </style>
 """, unsafe_allow_html=True)
 
-# ---------- DATA ----------
+# ---------- LOAD DATA ----------
 products = pd.DataFrame({
     "product": ["Laptop", "Mobile", "Headphones", "Smart Watch", "Camera"],
     "price": [55000, 15000, 2000, 3500, 45000],
@@ -48,30 +70,28 @@ orders = pd.DataFrame({
     "status": ["Delivered", "Shipped", "Processing", "Cancelled"]
 })
 
-# ---------- TOP NAV BAR ----------
-selected = option_menu(
-    menu_title="🛒 E-Commerce AI Dashboard",
-    options=["Products Table", "Stock Chart", "Chatbot", "Summary"],
-    icons=["table", "bar-chart", "robot", "graph-up"],
-    menu_icon="shop",
-    default_index=0,
-    orientation="horizontal",
-)
+# ---------- TITLE ----------
+st.title("🛒 E-Commerce AI Chatbot Dashboard")
 
-# ---------- PRODUCTS TABLE ----------
-if selected == "Products Table":
-    st.markdown("<h2>📦 Products Table</h2>", unsafe_allow_html=True)
-    st.dataframe(products, height=350, use_container_width=True)
+# ---------- TOP ROW ----------
+col1, col2 = st.columns([1,1])
 
-# ---------- STOCK CHART ----------
-if selected == "Stock Chart":
-    st.markdown("<h2>📊 Product Stock Chart</h2>", unsafe_allow_html=True)
-    st.bar_chart(products.set_index("product")["stock"], height=350)
+# TABLE
+with col1:
+    st.subheader("📦 Products Table")
+    st.dataframe(products, height=300, use_container_width=True)
 
-# ---------- CHATBOT ----------
-if selected == "Chatbot":
-    st.markdown("<h2>🤖 E-Commerce Chatbot</h2>", unsafe_allow_html=True)
+# CHART
+with col2:
+    st.subheader("📊 Stock Chart")
+    st.bar_chart(products.set_index("product")["stock"], height=300)
 
+# ---------- BOTTOM ROW ----------
+col3, col4 = st.columns([1,1])
+
+# CHATBOT
+with col3:
+    st.subheader("🤖 Chatbot")
     user_input = st.text_input("Ask product price or track order")
 
     reply = "I can show product prices and track orders 😊"
@@ -79,13 +99,13 @@ if selected == "Chatbot":
     if user_input:
         text = user_input.lower()
 
-        # Price
+        # Price Query
         for p in products["product"]:
             if p.lower() in text and "price" in text:
                 price = products[products["product"] == p]["price"].values[0]
                 reply = f"{p} price is ₹{price}"
 
-        # Order tracking
+        # Order Tracking
         if "order" in text or "track" in text:
             for oid in orders["order_id"].astype(str):
                 if oid in text:
@@ -94,12 +114,10 @@ if selected == "Chatbot":
 
     st.success(reply)
 
-# ---------- SUMMARY ----------
-if selected == "Summary":
-    st.markdown("<h2>📈 Business Summary</h2>", unsafe_allow_html=True)
-
-    col1, col2, col3 = st.columns(3)
-
-    col1.metric("Total Products", len(products))
-    col2.metric("Total Orders", len(orders))
-    col3.metric("Total Stock", products["stock"].sum())
+# SUMMARY
+with col4:
+    st.subheader("📈 Business Summary")
+    m1, m2, m3 = st.columns(3)
+    m1.metric("Products", len(products))
+    m2.metric("Orders", len(orders))
+    m3.metric("Total Stock", products["stock"].sum())
