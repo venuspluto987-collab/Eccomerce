@@ -1,0 +1,5 @@
+order_id,customer,product,status
+1001,Ravi,Laptop,Shipped
+1002,Anu,Mobile,Delivered
+1003,Karthik,Camera,Processing
+1004,Meena,Headphones,Out for Delivery
