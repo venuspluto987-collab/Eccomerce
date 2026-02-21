@@ -1,0 +1,33 @@
+body {
+    background-color: #f4f6f9;
+    font-family: Arial; 
+    overflow: hidden;
+}
+
+[data-testid="stAppViewContainer"] {
+    height: 100vh;
+
+}
+
+h1 {
+    color: #ff5722;
+    text-align: center;
+    font-size: 36px;
+}
+
+h2 {
+    color: #333;
+}
+
+.chatbox {
+    background-color: white;
+    padding: 12px;
+    border-radius: 8px;
+    border: 2px solid #ff5722;
+    font-size: 18px;
+}
+
+.bot {
+    color: green;
+    font-weight: bold;
+}
